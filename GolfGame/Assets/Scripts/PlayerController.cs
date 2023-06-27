@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
-{   public float horz;
-    public float vert;
-    public float speed = 0.0000001f;
-    public float xRange = 2500000000.0f;
+{   //public float horizontal;
+    //public float vertical;
+    public float speed = 6f;
     public float sens = 100.0f;
+    public float SmoothAngle = 0.3f;
+    float turnSmoothVel;
+    public Transform cam;
 
-    public Rigidbody rb;
-    public float jumpAmount = 10000; 
-    public Vector2 turn;
-    public GameObject obj;
-    public Camera userCamera;
+    public CharacterController controller;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,20 +23,18 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            rb.AddForce(Vector2.up * jumpAmount, ForceMode.Impulse);
-        } 
-        horz = Input.GetAxis("Horizontal");
-        transform.Translate(Vector3.right * Time.deltaTime * speed * horz);
-        vert = Input.GetAxis("Vertical");
-        transform.Translate(Vector3.forward * Time.deltaTime * speed * vert);
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical);
 
-        turn.x += Input.GetAxis("Mouse X") * sens;
-        turn.y += Input.GetAxis("Mouse Y") * sens;
-        transform.localRotation = Quaternion.Euler(0, turn.x, 0);
+        if(direction.magnitude >= 0.1f){
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVel, SmoothAngle);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-        userCamera.transform.RotateAround(obj.transform.position, Vector3.up, 20 * Time.deltaTime);
+            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            controller.Move(moveDir.normalized * speed * Time.deltaTime);
+        }
 
     }
 }
