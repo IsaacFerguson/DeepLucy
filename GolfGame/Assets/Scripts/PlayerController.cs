@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     float turnSmoothVel;
     public Transform cam;
 
+    public Animator anim;
+
     public CharacterController controller;
 
     // Start is called before the first frame update
@@ -26,6 +28,14 @@ public class PlayerController : MonoBehaviour
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
         Vector3 direction = new Vector3(horizontal, 0f, vertical);
+
+
+        if(horizontal != 0 || vertical != 0){
+            anim.SetBool("Forward", true);
+        }
+        else{
+            anim.SetBool("Forward", false);
+        }
 
         if(direction.magnitude >= 0.1f){
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
